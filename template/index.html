@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog</title>
+</head>
+<body>
+ {% for post in content %}
+    <div class="blog">
+        <div class="post-title">{{post.title}}</div>
+        <pre class="post-text">{{post.text}}</pre>
+        <div class="post-date">{{post.last_modified}}</div>
+    </div>
+    {% endfor %}
+</body>
+</html>
