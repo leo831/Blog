@@ -3,6 +3,7 @@ import jinja2
 import webapp2
 import cgi
 import re
+import datetime
 
 from google.appengine.ext import db
 
@@ -40,6 +41,11 @@ class MainPage(Handler):
 
         self.render("index.html", content = content)
 
+    #Delete all Content from detabase.
+    #def get(self, params)
+    #    results = content.fetch(100)
+     #   db.delete(results)
+
     def get(self):
         self.render_info()
 
@@ -72,8 +78,20 @@ class PostPage(Handler):
         else:
             self.render("post.html", post = post)
 
+class  DeletePost(Handler):
+    def post(self, post_id):
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if post:
+            post.delete()
+            return self.redirect('/')
+        else:
+            return self.redirect('/')
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/post/([0-9]+)', PostPage),
+    ('/post/([0-9]+)/delete', DeletePost),
     ('/newpost', NewPost),], debug=True)
