@@ -20,16 +20,19 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
-def blog_key(name= 'default'):
-        return db.key.from_path('post', name)
+def blog_key(name = 'default'):
+    return db.Key.from_path('blogs', name)
+
 
 class BlogContent(db.Model):
-
-
     title = db.StringProperty(required = True)
     text = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
+
+    def render(self):
+        self._render_text = self.content.replace('\n', '<br>')
+        return render_str("post.html", p = self)
 
 class MainPage(Handler):
     def render_info(self, title="", text="", last_modified="", error=""):
@@ -40,7 +43,6 @@ class MainPage(Handler):
     def get(self):
         self.render_info()
 
-
 class NewPost(Handler):
     def get(self):
         self.render("newpost.html")
@@ -50,7 +52,7 @@ class NewPost(Handler):
         text = self.request.get("text")
 
         if title and text:
-            a = BlogContent(title = title, text = text)
+            a = BlogContent(parent = blog_key(), title = title, text = text)
             a.put()
 
             self.redirect('/post/%s' % str(a.key().id()))
@@ -61,14 +63,14 @@ class NewPost(Handler):
 
 class PostPage(Handler):
     def get(self, post_id):
-        key = db.key.from_path('BlogContent', int(post_id), parent = blog_key())
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
         if not post:
             self.error(404)
             return
-
-        self.render("post.html", content = content)
+        else:
+            self.render("post.html", post = post)
 
 
 app = webapp2.WSGIApplication([
