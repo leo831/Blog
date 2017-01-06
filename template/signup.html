@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<form method="post">
+    <label>
+    <br>
+    Username:
+    <input type="text" name="username" value="{{username}}">
+    </label>
+    {{error_username}}
+    <br>
+    <label>
+    Password:
+    <input type="Password" name="password" value="">
+    </label>
+    {{error_password}}
+    <br>
+     <label>
+    Verity Password:
+    <input type="Password" name="verify" value="">
+    </label>
+    {{error_verify}}
+    <br>
+    <label>
+    Email(Optional):
+    <input type="text" name="email" value="{{email}}">
+    </label>
+    {{error_emai}}
+    <br>
+    <input type="submit" name="submit">
+</form>
+</body>
+</html>
