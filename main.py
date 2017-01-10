@@ -57,6 +57,9 @@ class Handler(webapp2.RequestHandler):
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
+    def logout(self):
+        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
@@ -216,6 +219,11 @@ class Login(Handler):
             msg = 'Invalid login'
             self.render('login.html', error = msg)
 
+class Logout(Handler):
+    def get(self):
+        self.logout()
+        self.redirect('/')
+
 class NewPost(Handler):
     def get(self):
         self.render("newpost.html")
@@ -262,4 +270,5 @@ app = webapp2.WSGIApplication([
     ('/post/([0-9]+)/delete', DeletePost),
     ('/signup', Register),
     ('/login', Login),
+    ('/logout', Logout),
     ('/newpost', NewPost),], debug=True)
