@@ -70,6 +70,7 @@ class BlogContent(db.Model):
     text = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
+    username = db.StringProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -236,9 +237,10 @@ class NewPost(Handler):
     def post(self):
         title = self.request.get("title")
         text = self.request.get("text")
+        username = self.user.name
 
         if title and text:
-            a = BlogContent(parent = blog_key(), title = title, text = text)
+            a = BlogContent(parent = blog_key(), title = title, text = text, username = username)
             a.put()
 
             self.redirect('/post/%s' % str(a.key().id()))
@@ -251,18 +253,24 @@ class EditPost(Handler):
     def get(self, post_id):
         self.render("editpost.html")
 
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+
     def post(self):
         title = self.request.get("title")
         text = self.request.get("text")
-        if title and text:
-            a = BlogContent(parent = blog_key(), title = title, text = text)
-            a.put()
 
-            self.redirect('/post/%s' % str(a.key().id()))
+        if post:
 
-        else:
-            error = "Please Enter both inputs"
-            self.render("newpost.html",error=error, title=title, text=text)
+            if title and text:
+                a = BlogContent(parent = blog_key(), title = title, text = text)
+                a.put()
+
+                self.redirect('/post/%s' % str(a.key().id()))
+
+            else:
+                error = "Please Enter both inputs"
+                self.render("newpost.html",error=error, title=title, text=text)
 
 
 class PostPage(Handler):
