@@ -86,9 +86,9 @@ class MainPage(Handler):
         self.render("index.html", content = content, username= username)
 
     #Delete all Content from detabase.
-    #def get(self, params)
-    #    results = content.fetch(100)
-     #   db.delete(results)
+    #def get(self, params):
+       # results = content.fetch(100)
+        #db.delete(results)
 
 
     def get(self):
@@ -280,22 +280,27 @@ class EditPost(Handler):
             error = "Please Enter both inputs"
             self.render("newpost.html",error=error, title=title, text=text)
 
-
 class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-        if self.user:
-            username = self.user.name
 
-            if not post:
-                self.error(404)
-                return
-            else:
-                self.render("post.html", post = post, username=username)
+
+        if post:
+            if self.user:
+                username = self.user.name
+
+            comments = db.GqlQuery("SELECT * FROM Comment WHERE commentId = " +post_id +" ORDER BY created DESC ")
+
+            self.render("post.html", post = post, username=username, comments = comments)
+
         else:
-            self.render("post.html", post = post, username="")
+            self.error(404)
+            return
+
+
+
 
 class  DeletePost(Handler):
     def post(self, post_id):
@@ -308,12 +313,37 @@ class  DeletePost(Handler):
         else:
             return self.redirect('/')
 
+class Comment(db.Model):
+    comment = db.StringProperty(required=True)
+    commentId = db.IntegerProperty(required = True)
+    username = db.StringProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
+
+class AddComment(Handler):
+    def post(self, post_id):
+
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+        if self.user and post:
+            addcomment = self.request.get("addcomment")
+            username = self.user.name
+
+            if addcomment:
+                c = Comment(parent = blog_key(), comment = addcomment, username = username, commentId = int(post_id))
+                c.put()
+
+                return self.redirect('/post/%s' % str(post.key().id()))
+
+            else:
+                return self.redirect('/')
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/post/([0-9]+)', PostPage),
     ('/post/([0-9]+)/delete', DeletePost),
     ('/post/([0-9]+)/edit', EditPost),
+    ('/post/([0-9]+)/addComment', AddComment),
     ('/signup', Register),
     ('/login', Login),
     ('/logout', Logout),

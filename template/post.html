@@ -19,7 +19,30 @@
             </div>
           </div>
         </div>
+        {%if username %}
+         <form method="post" action="/post/{{post.key().id()}}/addComment">
+
+<div class="form-group">
+    <label for="exampleTextarea">Add Comment</label>
+    <textarea class="form-control" id="exampleTextarea" rows="3" name="addcomment"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  {%endif%}
+  {% for comment in comments %}
+   <div class="card" >
+  <div class="card-header" style="background: white">
+    By: {{comment.username}}
+  </div>
+  <div class="card-block" >
+    <blockquote class="card-blockquote">
+      <p>{{comment.comment}}</p>
+    </blockquote>
+  </div>
+</div>
+  {% endfor %}
     </div>
+
 </div>
 </body>
 </html>{% endblock %}
