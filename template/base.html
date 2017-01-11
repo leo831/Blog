@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Blog</title>
+
+
+    <!-- Custom styles for this template -->
+     <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/album.css" rel="stylesheet">
+
+
+
+</head>
+<header>
+<body>
+<div class="navbar navbar-static-top navbar-dark bg-inverse">
+
+        <div class="container-fluid"></div>
+
+    <a href="/" class="navbar-brand">Home</a>
+    {%if username%}
+    <a class="navbar-brand" href="/newpost"><span>Create Post</span></a>
+    <a class="navbar-brand" href="/logout"><span>Logout</span></a>
+    <div class="navbar-brand">Welcome: {{username}} </div>
+    {%endif%}
+     {%if not username%}
+    <a class="navbar-brand" href="/login"><span>Login</span></a>
+    <a class="navbar-brand" href="/signup"><span>Sign Up</span></a>
+    {%endif%}
+
+</div>
+</header>
+{% block content %}
+{% endblock %}

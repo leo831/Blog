@@ -1,21 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Blog</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 <h1>Udacity blog</h1>
-
  {% for post in content %}
-    <div class="blog">
-        {%if username%}
-<div class="post-user">{{username}}</div>
-{%endif%}
-        <div class="post-title">{{post.title}}</div>
-        <pre class="post-text">{{post.text}}</pre>
-        <div class="post-date">{{post.created.strftime("%b %d, %Y")}}</div>
-        <button><a href="post/{{post.key().id()}}">view</a></button>
-    </div>
-    {% endfor %}
+<div class="album text-muted">
+      <div class="container">
+        <div class="row">
+          <div class="card">
+
+            <div class="card-block"><h4 class="card-title">{{post.title}}</h4>
+            <p class="card-text">{{post.text}}</p>
+            <a class="btn btn-outline-success" href="post/{{post.key().id()}}">View</a>
+            {{post.created.strftime("%b %d, %Y")}}
+
+            </div>
+
+          </div>
+        </div>
+    </div>{% endfor %}
+</div>
+
+
+
 </body>
-</html>
+
+</html>{% endblock%}

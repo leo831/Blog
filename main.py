@@ -79,14 +79,16 @@ class MainPage(Handler):
     def render_info(self, title="", text="", last_modified="", error="",username=""):
         content= db.GqlQuery("SELECT * FROM BlogContent ORDER BY created DESC ")
 
+        if self.user:
+            username = self.user.name
+
         self.render("index.html", content = content, username= username)
 
     #Delete all Content from detabase.
     #def get(self, params)
     #    results = content.fetch(100)
      #   db.delete(results)
-        if self.user:
-            username = self.user.name
+
 
     def get(self):
         self.render_info()
@@ -226,7 +228,10 @@ class Logout(Handler):
 
 class NewPost(Handler):
     def get(self):
-        self.render("newpost.html")
+        if self.user:
+            self.render("newpost.html")
+        else:
+            return self.redirect('/')
 
     def post(self):
         title = self.request.get("title")
@@ -244,14 +249,20 @@ class NewPost(Handler):
 
 class PostPage(Handler):
     def get(self, post_id):
+
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-        if not post:
-            self.error(404)
-            return
+        if self.user:
+            username = self.user.name
+
+            if not post:
+                self.error(404)
+                return
+            else:
+                self.render("post.html", post = post, username=username)
         else:
-            self.render("post.html", post = post)
+            self.render("post.html", post = post, username="")
 
 class  DeletePost(Handler):
     def post(self, post_id):
@@ -263,6 +274,7 @@ class  DeletePost(Handler):
             return self.redirect('/')
         else:
             return self.redirect('/')
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
