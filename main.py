@@ -247,6 +247,24 @@ class NewPost(Handler):
             error = "Please Enter both inputs"
             self.render("newpost.html",error=error, title=title, text=text)
 
+class EditPost(Handler):
+    def get(self, post_id):
+        self.render("editpost.html")
+
+    def post(self):
+        title = self.request.get("title")
+        text = self.request.get("text")
+        if title and text:
+            a = BlogContent(parent = blog_key(), title = title, text = text)
+            a.put()
+
+            self.redirect('/post/%s' % str(a.key().id()))
+
+        else:
+            error = "Please Enter both inputs"
+            self.render("newpost.html",error=error, title=title, text=text)
+
+
 class PostPage(Handler):
     def get(self, post_id):
 
@@ -280,6 +298,7 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/post/([0-9]+)', PostPage),
     ('/post/([0-9]+)/delete', DeletePost),
+    ('/post/([0-9]+)/edit', EditPost),
     ('/signup', Register),
     ('/login', Login),
     ('/logout', Logout),
