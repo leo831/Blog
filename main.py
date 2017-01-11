@@ -251,31 +251,38 @@ class NewPost(Handler):
 
 class EditPost(Handler):
     def get(self, post_id):
-        self.render("editpost.html")
-
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-    def post(self):
+
+        if self.user:
+            username = self.user.name
+
+            if not post:
+                self.error(404)
+                return
+            else:
+                self.render("editpost.html", post = post, username=username)
+        else:
+            self.render("editpost.html", post = post, username="")
+    def post(self, post_id):
         title = self.request.get("title")
         text = self.request.get("text")
+        username = self.user.name
 
-        if post:
+        if title and text:
+            a = BlogContent(parent = blog_key(), title = title, text = text, username = username)
+            a.put()
 
-            if title and text:
-                a = BlogContent(parent = blog_key(), title = title, text = text)
-                a.put()
+            self.redirect('/post/%s' % str(a.key().id()))
 
-                self.redirect('/post/%s' % str(a.key().id()))
-
-            else:
-                error = "Please Enter both inputs"
-                self.render("newpost.html",error=error, title=title, text=text)
+        else:
+            error = "Please Enter both inputs"
+            self.render("newpost.html",error=error, title=title, text=text)
 
 
 class PostPage(Handler):
     def get(self, post_id):
-
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
