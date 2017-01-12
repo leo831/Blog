@@ -288,12 +288,14 @@ class PostPage(Handler):
 
 
         if post:
+            comments = db.GqlQuery("SELECT * FROM Comment WHERE commentId = " +post_id +" ORDER BY created DESC ")
+
+            self.render("post.html", post = post, comments = comments, username = self.user.name)
+
             if self.user:
                 username = self.user.name
 
-            comments = db.GqlQuery("SELECT * FROM Comment WHERE commentId = " +post_id +" ORDER BY created DESC ")
-
-            self.render("post.html", post = post, username=username, comments = comments)
+                self.render("post.html", post = post, username=username, comments = comments)
 
         else:
             self.error(404)
@@ -337,6 +339,17 @@ class AddComment(Handler):
 
             else:
                 return self.redirect('/')
+class DeleteComment(Handler):
+    def post(self, post_id):
+        key = db.Key.from_path('Comment', int(post_id), parent=blog_key())
+        comment = db.get(key)
+
+        if comment:
+            comment.delete()
+            return self.redirect('/')
+        else:
+            return self.redirect('/')
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -344,6 +357,7 @@ app = webapp2.WSGIApplication([
     ('/post/([0-9]+)/delete', DeletePost),
     ('/post/([0-9]+)/edit', EditPost),
     ('/post/([0-9]+)/addComment', AddComment),
+    ('/post/([0-9]+)/deleteComment', DeleteComment),
     ('/signup', Register),
     ('/login', Login),
     ('/logout', Logout),

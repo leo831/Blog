@@ -29,15 +29,22 @@
   <button type="submit" class="btn btn-primary">Submit</button>
   </form>
   {%endif%}
+
   {% for comment in comments %}
-   <div class="card" >
-  <div class="card-header" style="background: white">
+<div class="card" >
+    <div class="card-header" style="background: white">
     By: {{comment.username}}
-  </div>
-  <div class="card-block" >
-    <blockquote class="card-blockquote">
-      <p>{{comment.comment}}</p>
-    </blockquote>
+    </div>
+    <div class="card-block" >
+        <blockquote class="card-blockquote">
+            <p>{{comment.comment}}</p>
+        </blockquote>
+        {%if post.username == username%}
+        <form action="{{comment.key().id()}}/deleteComment" method="POST">
+            <input type="hidden" name="deleteComment" value="delete">
+            <input class="btn btn-outline-success" type="submit" name="delete" value="Delete">
+        </form>
+        {%endif%}
   </div>
 </div>
   {% endfor %}
