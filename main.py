@@ -266,15 +266,20 @@ class EditPost(Handler):
         else:
             self.render("editpost.html", post = post, username="")
     def post(self, post_id):
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+
         title = self.request.get("title")
         text = self.request.get("text")
         username = self.user.name
 
         if title and text:
-            a = BlogContent(parent = blog_key(), title = title, text = text, username = username)
-            a.put()
+            post.title = title
+            post.text = text
 
-            self.redirect('/post/%s' % str(a.key().id()))
+            post.put()
+
+            self.redirect('/post/%s' % str(post.key().id()))
 
         else:
             error = "Please Enter both inputs"
@@ -290,19 +295,15 @@ class PostPage(Handler):
         if post:
             comments = db.GqlQuery("SELECT * FROM Comment WHERE commentId = " +post_id +" ORDER BY created DESC ")
 
-            self.render("post.html", post = post, comments = comments, username = self.user.name)
-
             if self.user:
                 username = self.user.name
-
                 self.render("post.html", post = post, username=username, comments = comments)
+            else:
+                self.render("post.html", post = post, comments = comments)
 
         else:
             self.error(404)
             return
-
-
-
 
 class  DeletePost(Handler):
     def post(self, post_id):
@@ -350,6 +351,23 @@ class DeleteComment(Handler):
         else:
             return self.redirect('/')
 
+class  EditComment(Handler):
+    def post(self, post_id):
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        commentId = self.request.get("commentId")
+        editcomment = self.request.get("text")
+        if editcomment and commentId:
+
+            key = db.Key.from_path('Comment', int(commentId), parent=blog_key())
+            comment = db.get(key)
+
+            if comment:
+                comment.comment = editcomment
+                comment.put()
+
+                return self.redirect('/post/%s' % str(post.key().id()))
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -358,6 +376,7 @@ app = webapp2.WSGIApplication([
     ('/post/([0-9]+)/edit', EditPost),
     ('/post/([0-9]+)/addComment', AddComment),
     ('/post/([0-9]+)/deleteComment', DeleteComment),
+    ('/post/([0-9]+)/editComment', EditComment),
     ('/signup', Register),
     ('/login', Login),
     ('/logout', Logout),
