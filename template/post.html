@@ -16,6 +16,10 @@
                 </form>
                 <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
                 {%endif%}
+                <form method="post" action="{{post.key().id()}}/like">
+                    <input type="hidden" name="likePost" value="like">
+                    <button type="button" class="btn btn-success">Like</button>
+                </form>
             </div>
           </div>
         </div>
