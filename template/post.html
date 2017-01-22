@@ -8,6 +8,7 @@
             <div class="card-block"><h4 class="card-title">{{post.title}}</h4><p class="card-text">{{post.text}}</p>
             <p class="card-text">by: {{post.username}} </p>
             {{post.created.strftime("%b %d, %Y")}}
+                {%if post.likes != None and post.likes != 0 %}<li class="like"><i class="fa fa-heart-o"></i> Likes: {{post.likes}}</li>{% endif %}
                 {%if post.username == username%}
                 <form action="{{post.key().id()}}/delete" method="POST">
                     <input type="hidden" name="deletePost" value="delete">
@@ -16,10 +17,13 @@
                 </form>
                 <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
                 {%endif%}
-                <form method="post" action="{{post.key().id()}}/like">
-                    <input type="hidden" name="likePost" value="like">
-                    <button type="button" class="btn btn-success">Like</button>
+                {%if post.username != username and username%}
+                <!-- Form for like post -->
+                <form method="post" action="{{post.key().id()}}/likepost" id="likeForm">
+                    <input type="hidden" name="likePost" value="{{post.key().id()}}">
+                    <button type="submit" class="btn btn-success" form="likeForm" name="likeForm">Like</button>
                 </form>
+                {%endif%}
             </div>
           </div>
         </div>

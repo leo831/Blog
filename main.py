@@ -71,6 +71,7 @@ class BlogContent(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
     username = db.StringProperty()
+    likes = db.IntegerProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -369,6 +370,49 @@ class  EditComment(Handler):
 
                 return self.redirect('/post/%s' % str(post.key().id()))
 
+class Like(db.Model):
+    post_id = db.IntegerProperty(required = True)
+    username = db.StringProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
+
+class LikePost(Handler):
+    def post(self, post_id):
+        key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if post:
+            likepost = self.request.get("likePost")
+            liked_post = False
+
+            # Retrieve all likes belonging to a post
+            likes = Like.all().filter('post_id =', int(post_id))
+
+            if self.user:
+                for like in likes:
+                    if self.user.name == like.username:
+                        liked_post = True
+                        like_id = like.key().id
+                        break
+
+            if likepost and self.user:
+                if post.username != self.user.name and liked_post is False:
+                    like = Like(parent=blog_key(), username = self.user.name, post_id = int(post_id))
+                    like.put()
+
+                    if post.likes is None:
+                        post.likes = 1
+                        post.put()
+                        return self.redirect('/post/'+post_id)
+                    else:
+                        post.likes = int(post.likes) + 1
+                        post.put()
+                        return self.redirect('/post/'+post_id)
+                else:
+                    return self.redirect('/post/'+post_id)
+        else:
+            return self.redirect('/')
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/post/([0-9]+)', PostPage),
@@ -377,6 +421,7 @@ app = webapp2.WSGIApplication([
     ('/post/([0-9]+)/addComment', AddComment),
     ('/post/([0-9]+)/deleteComment', DeleteComment),
     ('/post/([0-9]+)/editComment', EditComment),
+    ('/post/([0-9]+)/likepost', LikePost),
     ('/signup', Register),
     ('/login', Login),
     ('/logout', Logout),
