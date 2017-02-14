@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
+  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -12,30 +12,39 @@
 
 
     <!-- Custom styles for this template -->
-     <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" href="/static/css/bootstrap.css" rel="stylesheet">
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/album.css" rel="stylesheet">
     <link href="../static/css/album.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
+  </head>
+  <body>
+    <nav class="navbar navbar-static-top navbar-dark bg-inverse">
+      <div class="container-fluid"></div>
+      <a href="/" class="navbar-brand">Home</a>
+      {%if username%}
+      <a class="navbar-brand" href="/newpost"><span>Create Post</span></a>
+      <a class="navbar-brand" href="/logout"><span>Logout</span></a>
+      <div class="navbar-brand float-xs-right">Welcome: {{username}} </div>
+      {%endif%}
+      {%if not username%}
+      <a class="navbar-brand" href="/login"><span>Login</span></a>
+      <a class="navbar-brand" href="/signup"><span>Sign Up</span></a>
+      {%endif%}
+    </nav>
+    {% block heading %}
+    {% endblock %}
 
+    <div class="album">
+      <div class="container">
+        {% block content %}
 
-</head>
-<header>
-<body>
-<div class="navbar navbar-static-top navbar-dark bg-inverse">
-
-        <div class="container-fluid"></div>
-
-    <a href="/" class="navbar-brand">Home</a>
-    {%if username%}
-    <a class="navbar-brand" href="/newpost"><span>Create Post</span></a>
-    <a class="navbar-brand" href="/logout"><span>Logout</span></a>
-    <div class="navbar-brand">Welcome: {{username}} </div>
-    {%endif%}
-     {%if not username%}
-    <a class="navbar-brand" href="/login"><span>Login</span></a>
-    <a class="navbar-brand" href="/signup"><span>Sign Up</span></a>
-    {%endif%}
-
-</div>
-</header>
-{% block content %}
-{% endblock %}
+        {% endblock %}
+      </div>
+    </div>
+  </body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="bootstrap/js/jquery.min.js"><\/script>')</script>
+  <script src="../static/js/bootstrap.min.js"></script>
+</html>

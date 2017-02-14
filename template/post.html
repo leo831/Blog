@@ -1,97 +1,123 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="album text-muted">
-      <div class="container">
-        <div class="row">
-          <div class="card">
 
-            <div class="card-block"><h4 class="card-title">{{post.title}}</h4><p class="card-text">{{post.text}}</p>
-            <p class="card-text">by: {{post.username}} </p>
-            {{post.created.strftime("%b %d, %Y")}}
-                {%if post.likes != None and post.likes != 0 %}<li class="like"><i class="fa fa-heart-o"></i> Likes: {{post.likes}}</li>{% endif %}
-                {%if post.username == username%}
-                <form action="{{post.key().id()}}/delete" method="POST">
-                    <input type="hidden" name="deletePost" value="delete">
-                    <input class="btn btn-outline-success" type="submit" name="delete" value="Delete">
+<div class="row">
+  <div class="card full">
+    <div class="card-block">
+      <h4 class="card-title">{{post.title}}</h4>
+      <p class="card-text">{{post.text}}</p>
+      <p class="card-text">by: {{post.username}}
+        <small class="float-xs-right fa fa-calendar-o"> {{post.created.strftime("%b %d, %Y")}}</small></p>
+      {%if post.likes != None and post.likes != 0 %}
 
-                </form>
-                <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
-                {%endif%}
-                {%if post.username != username and username%}
-                <!-- Form for like post -->
-                <form method="post" action="{{post.key().id()}}/likepost" id="likeForm">
-                    <input type="hidden" name="likePost" value="{{post.key().id()}}">
-                    <button type="submit" class="btn btn-success" form="likeForm" name="likeForm">Like</button>
-                </form>
-                {%endif%}
-            </div>
-          </div>
-        </div>
-        {%if username %}
-         <form method="post" action="/post/{{post.key().id()}}/addComment">
+      <li class="fa fa-heart-o"> {{post.likes}}</li>
+      {% endif %}
+      {% if post.comments != None and post.comments !=0%}
+      <li class="fa fa-comment-o"> {{ post.comments }}</li>
+      {%endif%}
+      {%if post.username == username%}
+      <form action="{{post.key().id()}}/delete" method="POST">
+        <input type="hidden" name="deletePost" value="delete">
+        <input class="btn btn-outline-success" type="submit" name="delete" value="Delete">
+      </form>
+      <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
+      {%endif%}
 
-<div class="form-group">
+      {%if post.username != username and username%}
+      {% if liked_post == True and like_Id != None %}
+
+      <form method="post" action="{{post.key().id()}}/unlikePost" id="unlikeForm">
+        <input type="hidden" name="unlikePost" value="{{like_id}}">
+      </form>
+      <button type="submit" form="unlikeForm" name="unlikeForm"  class="btn btn-danger">Unlike</button>
+      {%else%}
+      <!-- Form for like post -->
+      <form method="post" action="{{post.key().id()}}/likepost" id="likeForm">
+        <input type="hidden" name="likePost" value="{{post.key().id()}}">
+        <button type="submit" class="btn btn-success" form="likeForm" name="likeForm">Like</button>
+      </form>
+
+      {%endif%}
+      {%endif%}
+    </div>
+  </div>
+</div>
+
+
+
+
+{%if username %}
+<form method="post" action="/post/{{post.key().id()}}/addComment">
+  <div class="form-group">
     <label for="exampleTextarea">Add Comment</label>
     <textarea class="form-control" id="exampleTextarea" rows="3" name="addcomment"></textarea>
   </div>
   <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-  {%endif%}
+</form>
+<br>
+{%endif%}
 
-  {% for comment in comments %}
-<div class="card" >
-    <div class="card-header" style="background: white">
-    By: {{comment.username}}
-    </div>
-    <div class="card-block" >
+
+{% for comment in comments %}
+<div class="container">
+  <div class="row">
+    <div class="card" >
+      <div class="card-header" style="background: white">
+        <strong>{{comment.username}}</strong> <small>commented on </small><small class="fa fa-calendar-o"> {{comment.created.strftime("%b %d, %Y")}}</small>
+      </div>
+      <div class="card-block" >
         <blockquote class="card-blockquote">
-            <p>{{comment.comment}}</p>
+          <p>{{comment.comment}}</p>
         </blockquote>
-        {%if post.username == username%}
-        <form action="{{comment.key().id()}}/deleteComment" method="POST">
-            <input type="hidden" name="deleteComment" value="delete">
-            <input class="btn btn-outline-success" type="submit" name="delete" value="Delete">
+        {%if username == comment.username%}
+        <form action="/post/{{post.key().id()}}/deleteComment" method="POST" id="deleteComment">
+          <input type="hidden" name="commentId" value="{{comment.key().id()}}">
         </form>
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-  Edit
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit Comment</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="/post/{{post.key().id()}}/editComment" id="editComment">
-            <textarea name="text" class="form-control" >{{comment.comment}}</textarea>
-            <input type="hidden" name="commentId" value="{{comment.key().id()}}">
-
-        <br>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary"  name="editComment">Save</button>
-      </div>
-    </div>
-  </div></form>
-</div>
+        <button type="submit" form="deleteComment" name="deleteComment" class="btn btn-danger">Delete</button>
 
         {%endif%}
+        {%if username == comment.username%}
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+          Edit
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Comment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form method="POST" action="/post/{{post.key().id()}}/editComment" id="editComment">
+                  <textarea name="text" class="form-control" >{{comment.comment}}</textarea>
+                  <input type="hidden" name="commentId" value="{{comment.key().id()}}">
+
+                  <br>
+                  </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary"  name="editComment">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </form>
+
+      </div>
+    </div>
+    {%endif%}
   </div>
 </div>
-  {% endfor %}
-    </div>
-
+{% endfor %}
+</div>
 
 </div>
-</body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="bootstrap/js/jquery.min.js"><\/script>')</script>
-<script src="../static/js/bootstrap.min.js"></script>
-</html>{% endblock %}
+
+
+
+{% endblock %}

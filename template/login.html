@@ -1,24 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-    <form method="post">
-    <label>Username:
-        <input type="text" name="username" value="">
-        </label>
-        <br>
-        <br>
-        <label>
-        Password:
-        <input type="password" name="password">
-        </label>
-        <br>
-        <input type="submit" name="submit" value="Login">
+{% extends "base.html" %}
+{% block content %}
 
-    </form>
+<br>
+<form method="post">
+  <div class="form-group row">
+    <h1 class="text-muted">Login Information</h1>
+    <label for="example-text-input" class="col-2 col-form-label">Username:</label>
+    <input class="form-control col-6" id="example-text-input" type="text" name="username" value="">
+    <br>
+    <label for="example-text-input" class="col-2 col-form-label">Password:</label>
+    <input class="form-control" id="example-text-input" type="password" name="password">
+    <br>
+    <input class="btn btn-primary" type="submit" name="submit" value="Login">
+  </div>
+</form>
 
-
-</body>
-</html>
+{%endblock%}

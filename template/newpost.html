@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Blog</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 <form method="post">
-    <label>
-        <div>Title</div>
-        <input type="text" name="title" value="{{title}}">
-    </label>
-    <label>
-        <div>content</div>
-        <textarea name="text">{{text}}</textarea>
-    </label>
+  <div class="form-group row">
+    <h1 class="text-muted">Create New Post</h1>
+    <label for="example-text-input" class="col-2 col-form-label">Title:</label>
+    <div class="col-10">
+      <input  class="form-control" id="example-text-input" type="text" name="title" value="{{title}}">
+    </div>
+
+    <label for="exampleTextarea">Post Content:</label>
+    <textarea class="form-control" id="exampleTextarea" rows="3" name="text">{{text}}</textarea>
     <div class="error">{{error}}</div>
-    <input type="submit" name="submit">
+    <br>
+    <input type="submit" name="submit"  class="btn btn-primary">
+  </div>
 </form>
-</body>
-</html>
+
+{% endblock %}

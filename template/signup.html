@@ -1,37 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-muted">Registration Form</h1>
 <form method="post">
-    <label>
+
+    <div class="form-group row">
+        <label class="col-2 col-form-label">Username:</label>
+        <div class="col-ms-10">
+        <input class="form-control" type="text" name="username" value="{{username}}">{{error_username}}
+        </div>
+    </div>
+
+    <div class="form-group row">
+    <label class="col-ms-2">Password:</label>
+        <div class="col-ms-10">
+    <input class="form-control" type="Password" name="password" value="">{{error_password}}
+    </div>
+    </div>
+
+     <div class="form-group row">
+        <label class="col-ms-2">Verify Password:</label>
+        <div class="col-ms-10">
+    <input class="form-control" type="Password" name="verify" value="">{{error_verify}}
+    </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-ms-2">Email (Optional):</label>
+        <div class="col-ms-10">
+    <input class="form-control" type="text" name="email" value="{{email}}">{{error_emai}}
+    </div>
+    </div>
     <br>
-    Username:
-    <input type="text" name="username" value="{{username}}">
-    </label>
-    {{error_username}}
-    <br>
-    <label>
-    Password:
-    <input type="Password" name="password" value="">
-    </label>
-    {{error_password}}
-    <br>
-     <label>
-    Verity Password:
-    <input type="Password" name="verify" value="">
-    </label>
-    {{error_verify}}
-    <br>
-    <label>
-    Email(Optional):
-    <input type="text" name="email" value="{{email}}">
-    </label>
-    {{error_emai}}
-    {{error_username}}
-    <br>
-    <input type="submit" name="submit">
+    <input class="btn btn-primary" type="submit" name="submit">
+    </div>
 </form>
-</body>
-</html>
+
+{%endblock%}

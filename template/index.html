@@ -1,26 +1,30 @@
 {% extends "base.html" %}
+{% block heading %}
+{% include "cover.html" %}
+{% endblock %}
 {% block content %}
-<h1>Udacity blog</h1>
- {% for post in content %}
+
 <div class="album text-muted">
-      <div class="container">
-        <div class="row">
-          <div class="card">
+  <div class="container">
+    <div class="row">{% for post in content %}
+      <div class="card" >
+        <div class="card-block">
+          <h4 class="card-title">{{post.title}}</h4>
+          <p class="card-text">{{post.text}}</p>
+          <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+          <a class="btn btn-outline-success" href="post/{{post.key().id()}}">View</a>
 
-            <div class="card-block"><h4 class="card-title">{{post.title}}</h4>
-            <p class="card-text">{{post.text}}</p>
-            <a class="btn btn-outline-success" href="post/{{post.key().id()}}">View</a>
-            {{post.created.strftime("%b %d, %Y")}}
-
-            </div>
-
-          </div>
+          {% if post.likes != None and post.likes !=0%}
+          <label class="float-right fa fa-heart-o"> {{post.likes}} </label>
+          {%endif%}
+          {% if post.comments != None and post.comments !=0%}
+          <label class="float-right fa fa-comment-o">  {{post.comments}}</label>
+          {%endif%}
+          <label class="float-xs-right fa fa-calendar-o"><small> {{post.created.strftime("%b %d, %Y")}}</small></label>
         </div>
-    </div>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
-
-
-
-</body>
-
-</html>{% endblock%}
+{% endblock%}
