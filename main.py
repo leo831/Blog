@@ -14,7 +14,7 @@ from google.appengine.ext import db
 template_dir = os.path.join(os.path.dirname(__file__), 'template')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
-
+# Secret key
 secret = 'udacityNanodegree'
 
 
@@ -60,18 +60,23 @@ class Handler(webapp2.RequestHandler):
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
 
+    # Get cookie for current user
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
+    # Delete user cookie
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
+    # Check if user is logged in
+    # Check if cookies are the same for user and Hash
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
 
 
+# Class for post entities
 class BlogContent(db.Model):
     title = db.StringProperty(required=True)
     text = db.TextProperty(required=True)
@@ -86,11 +91,14 @@ class BlogContent(db.Model):
         return render_str("post.html", p=self)
 
 
+# section for main page
 class MainPage(Handler):
     def render_info(self, title="", text="",
                     last_modified="", error="", username=""):
+        # Get latest content for post
         content = db.GqlQuery("SELECT*FROM BlogContent ORDER BY created DESC")
 
+        # get current user
         if self.user:
             username = self.user.name
 
@@ -127,6 +135,7 @@ def users_key(group='default'):
     return db.Key.from_path('users', group)
 
 
+# class for user entities
 class User(db.Model):
     name = db.StringProperty(required=True)
     pw_hash = db.StringProperty(required=True)
@@ -227,6 +236,7 @@ class Register(Signup):
             self.redirect('/')
 
 
+# Section for login
 class Login(Handler):
     def get(self):
         self.render('login.html')
@@ -244,12 +254,14 @@ class Login(Handler):
             self.render('login.html', error=msg)
 
 
+# Handler for logout and clear cookie
 class Logout(Handler):
     def get(self):
         self.logout()
         self.redirect('/')
 
 
+# Handler for creating post
 class NewPost(Handler):
     def get(self):
         if self.user:
@@ -259,11 +271,16 @@ class NewPost(Handler):
             return self.redirect('/')
 
     def post(self):
+        if not self.user:
+            return self.redirect('/')
+
+        # retrieve values from input form
         title = self.request.get("title")
         text = self.request.get("text")
         username = self.user.name
 
-        if title and text:
+        # check if the there is content from post
+        if title and text and self.user:
             a = BlogContent(parent=blog_key(), title=title,
                             text=text, username=username)
             a.put()
@@ -273,6 +290,7 @@ class NewPost(Handler):
             self.render("newpost.html", error=error, title=title, text=text)
 
 
+# Handler for editing a post
 class EditPost(Handler):
     def get(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -292,23 +310,27 @@ class EditPost(Handler):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-        title = self.request.get("title")
-        text = self.request.get("text")
-        username = self.user.name
+        if post:
+            title = self.request.get("title")
+            text = self.request.get("text")
+            username = self.user.name
 
-        if title and text:
-            post.title = title
-            post.text = text
+            if title and text and self.user:
+                post.title = title
+                post.text = text
 
-            post.put()
+                post.put()
 
-            self.redirect('/post/%s' % str(post.key().id()))
+                return self.redirect('/post/%s' % str(post.key().id()))
 
+            else:
+                error = "Please Enter both inputs"
+                self.render("newpost.html", error=error, title=title, text=text)
         else:
-            error = "Please Enter both inputs"
-            self.render("newpost.html", error=error, title=title, text=text)
+            return self.redirect('/')
 
 
+# Handler for render posts
 class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -319,9 +341,11 @@ class PostPage(Handler):
             like_id = None
 
             try:
+                # retreive likes
                 likes = db.GqlQuery("SELECT * FROM Like WHERE"
                                     " post_id="+post_id)
 
+                # retreive comments
                 comments = db.GqlQuery("SELECT * FROM Comment WHERE post_id = "
                                        + post_id +"ORDER BY created DESC")
             except Exception:
@@ -346,18 +370,23 @@ class PostPage(Handler):
             return
 
 
+# Handler for leteting post
 class DeletePost(Handler):
     def post(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-        if post:
-            post.delete()
-            return self.redirect('/')
+        if post and self.user:
+            if post.username == self.user.name:
+                post.delete()
+                return self.redirect('/')
+            else:
+                return self.redirect('/')
         else:
             return self.redirect('/')
 
 
+# Class for comment entities
 class Comment(db.Model):
     post_id = db.IntegerProperty(required=True)
     username = db.StringProperty(required=True)
@@ -366,20 +395,24 @@ class Comment(db.Model):
     last_modified = db.DateTimeProperty(auto_now=True)
 
 
+# Handler for adding comments
 class AddComment(Handler):
     def post(self, post_id):
 
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
+
         if self.user and post:
+            # retrieve input data
             addcomment = self.request.get("addcomment")
             username = self.user.name
 
-            if addcomment:
+            # check if there is content
+            if addcomment and self.user:
                 c = Comment(parent=blog_key(), comment=addcomment,
                             username=username, post_id=int(post_id))
                 c.put()
-
+                # counter for commets
                 if post.comments is None:
                     post.comments = 1
                 else:
@@ -393,6 +426,7 @@ class AddComment(Handler):
                 return self.redirect('/')
 
 
+# handler for deleting comments
 class DeleteComment(Handler):
     def post(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -420,6 +454,7 @@ class DeleteComment(Handler):
             return self.redirect('/')
 
 
+# Handler for editing comment
 class EditComment(Handler):
     def post(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -448,6 +483,7 @@ class EditComment(Handler):
             return self.redirect('/')
 
 
+# class for likes enttities
 class Like(db.Model):
     post_id = db.IntegerProperty(required=True)
     username = db.StringProperty(required=True)
@@ -455,8 +491,10 @@ class Like(db.Model):
     last_modified = db.DateTimeProperty(auto_now=True)
 
 
+# Handler for likepost
 class LikePost(Handler):
     def post(self, post_id):
+        # get current post
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
@@ -467,6 +505,7 @@ class LikePost(Handler):
             # Retrieve all likes belonging to a post
             likes = Like.all().filter('post_id =', int(post_id))
 
+            # check is the user is logged
             if self.user:
                 for like in likes:
                     if self.user.name == like.username:
@@ -494,6 +533,7 @@ class LikePost(Handler):
             return self.redirect('/')
 
 
+# Handler for unliking post
 class UnlikePost(Handler):
     def post(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -502,7 +542,7 @@ class UnlikePost(Handler):
         if post:
             unlikePost = self.request.get('unlikePost')
             liked_post = False
-            # Get all likes belonging to a post
+            # Get all likes from post
             likes = Like.all().filter('post_id =', int(post_id))
             # Check if logged in user has like the post
             if self.user:
