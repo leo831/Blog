@@ -17,10 +17,13 @@
       {%endif%}
       {%if post.username == username%}
       <form action="{{post.key().id()}}/delete" method="POST">
+      <div class="form-group row">
         <input type="hidden" name="deletePost" value="delete">
-        <input class="btn btn-outline-success" type="submit" name="delete" value="Delete">
+        <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
+        <input class="btn btn-danger" type="submit" name="delete" value="Delete">
+        </div>
       </form>
-      <a class="btn btn-outline-success" href="{{post.key().id()}}/edit">Edit</a>
+
       {%endif%}
 
       {%if post.username != username and username%}

@@ -4,9 +4,8 @@
 {% endblock %}
 {% block content %}
 
-<div class="album text-muted">
-  <div class="container">
-    <div class="row">{% for post in content %}
+    <div class="card-columns">
+    {% for post in content %}
       <div class="card" >
         <div class="card-block">
           <h4 class="card-title">{{post.title}}</h4>
@@ -25,6 +24,5 @@
       </div>
       {% endfor %}
     </div>
-  </div>
-</div>
+
 {% endblock%}

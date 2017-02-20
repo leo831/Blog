@@ -272,7 +272,7 @@ class NewPost(Handler):
 
     def post(self):
         if not self.user:
-            return self.redirect('/')
+            return self.redirect('/login')
 
         # retrieve values from input form
         title = self.request.get("title")
@@ -296,7 +296,7 @@ class EditPost(Handler):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
         post = db.get(key)
 
-        if self.user:
+        if self.user.name == post.username:
             username = self.user.name
             if not post:
                 self.error(404)
@@ -304,7 +304,7 @@ class EditPost(Handler):
             else:
                 self.render("editpost.html", post=post, username=username)
         else:
-            self.render("editpost.html", post=post, username="")
+            return self.redirect('/post/%s' % str(post.key().id()))
 
     def post(self, post_id):
         key = db.Key.from_path('BlogContent', int(post_id), parent=blog_key())
@@ -316,12 +316,13 @@ class EditPost(Handler):
             username = self.user.name
 
             if title and text and self.user:
-                post.title = title
-                post.text = text
+                if post.username == self.user.name:
+                    post.title = title
+                    post.text = text
 
-                post.put()
+                    post.put()
 
-                return self.redirect('/post/%s' % str(post.key().id()))
+                    return self.redirect('/post/%s' % str(post.key().id()))
 
             else:
                 error = "Please Enter both inputs"
